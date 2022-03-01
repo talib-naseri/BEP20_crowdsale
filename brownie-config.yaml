@@ -1,0 +1,10 @@
+networks:
+  default: development
+
+  bsc-test: 
+    verify: true
+
+dotenv: .env
+
+wallets:
+  from_key: ${PRIVATE_KEY}

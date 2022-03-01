@@ -1,0 +1,39 @@
+.container {
+    padding: 10%;
+    padding-top: 5%;
+    margin: 2%;
+    background-color: rgb(165, 136, 245);
+}
+
+.secondary {
+    color: rgb(221, 26, 179);;
+}
+
+.success {
+    color:rgb(46, 125, 50);
+}
+
+.button_container {
+    margin: 2%;
+    text-align: center;
+}
+
+.mt{
+    margin: 5%;
+}
+
+.mb{
+    margin-bottom: 5%;
+}
+
+#max_btn{
+    border: 0;
+    border-style: solid;
+    border-radius: 14px;
+    background-color: rgb(81, 17, 230);
+    color: whitesmoke;
+}
+
+.small_txt{
+    font-size: smaller;
+}
