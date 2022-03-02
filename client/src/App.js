@@ -7,18 +7,21 @@ import {
   FormControlLabel,
   Checkbox,
 } from '@mui/material';
+import { LoadingButton } from '@mui/lab';
 import AccountBalanceWalletOutlinedIcon from '@mui/icons-material/AccountBalanceWalletOutlined';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { BuyInput, GetInput } from './components/input';
 import Web3 from 'web3';
 import { useState } from 'react';
-import { getMunziContract } from './components/contracts';
+import { getBalance, buyToken } from './components/web3Utils';
 
 function App() {
   const [connected, setConnection] = useState(false);
   const [amount, setAmount] = useState(0);
   const [haveRef, setHaveRef] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
+  // Connection functions
   const connect = async () => {
     if (window.web3) {
       await window.ethereum.request({ method: 'eth_requestAccounts' });
@@ -38,12 +41,27 @@ function App() {
     setConnection(false);
   };
 
+  // input functions
   const handleRefChange = (event) => {
     setHaveRef(event.target.checked);
   };
 
   const submit = async () => {
-    console.log('submitting: ', { amount, haveRef });
+    if (!connected) return console.log('Not Connected');
+    if (!amount || amount <= 0) return;
+
+    // check if value exceeds balance
+    const balance = await getBalance(window.web3);
+    if (amount > balance) return console.log('Balance Amount Exceeded');
+
+    setSubmitted(true);
+
+    // send transaction
+    await buyToken(window.web3, amount);
+
+    // clear values
+    setAmount(0);
+    setSubmitted(false);
   };
 
   return (
@@ -113,14 +131,15 @@ function App() {
               />
             </Container>
             <div className='row'>
-              <Button
+              <LoadingButton
+                loading={submitted}
                 variant='contained'
                 color='success'
                 className='d-block rounded-pill'
                 onClick={() => submit()}
               >
                 Buy $SPL
-              </Button>
+              </LoadingButton>
             </div>
           </Box>
         </Grid>

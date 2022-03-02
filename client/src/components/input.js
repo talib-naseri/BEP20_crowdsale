@@ -1,6 +1,6 @@
 import { Box, Grid, TextField } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { getCrowdSaleContract } from './contracts';
+import { getCrowdSaleContract } from './web3Utils';
 
 const BuyInput = (props) => {
   const web3 = props.web3;
@@ -9,7 +9,7 @@ const BuyInput = (props) => {
 
   // get balance
   useEffect(() => {
-    web3 && getBalance();
+    web3 && getBalance(web3);
   });
 
   const getBalance = async () => {
@@ -44,6 +44,7 @@ const BuyInput = (props) => {
         justifyContent='center'
         alignItems='center'
         spacing={1}
+        rowSpacing={2}
       >
         <Grid item xs={2}>
           <span className='fw-bold small_txt'>Buy</span>
@@ -69,7 +70,9 @@ const BuyInput = (props) => {
             error={exceedBalance}
             id='id="fullWidth'
             label='Enter an Amount'
-            variant='filled'
+            variant='outlined'
+            size='small'
+            type='number'
             helperText={exceedBalance && 'Exceeded your balance'}
             value={props.value}
             onChange={handleChange}
@@ -114,6 +117,7 @@ const GetInput = (props) => {
         justifyContent='center'
         alignItems='center'
         spacing={1}
+        rowSpacing={2}
       >
         <Grid item xs={2}>
           <span className='fw-bold small_txt'>Get</span>
@@ -127,14 +131,11 @@ const GetInput = (props) => {
         </Grid>
         <Grid item xs={2} sx={{ textAlign: 'left' }}></Grid>
         <Grid item xs={9}>
-          {/* <Box border={1} borderRadius={4}>
-            {props.value ? Number(props.value) * rate : 0}
-          </Box> */}
-
           <TextField
             id='filled-basic'
             label='Shows how much you get'
-            variant='filled'
+            variant='outlined'
+            size='small'
             value={props.value ? Number(props.value) * rate : 0}
           />
         </Grid>
