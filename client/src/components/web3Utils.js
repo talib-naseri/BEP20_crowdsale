@@ -27,6 +27,11 @@ const getBalance = async (web3, address = null) => {
 
 const buyToken = async (web3, value) => {
   if (!web3) return;
+  const info = {
+    severity: 'success',
+    title: 'Success',
+    message: 'Transaction is done successfully',
+  };
 
   // Get tx info
   const contract = getCrowdSaleContract(web3);
@@ -49,12 +54,17 @@ const buyToken = async (web3, value) => {
     .once('receipt', (receipt) => {
       console.log('RECEIPT: ', receipt);
     })
-    .on('error', (error) => {
-      console.log('ERROR: ', error);
-    })
     .then((receipt) => {
       console.log('SUCCESS: ', receipt);
+    })
+    .catch((error) => {
+      console.log('ERROR: ', error);
+      info.severity = 'error';
+      info.title = 'Error';
+      info.message = error.message;
     });
+
+  return info;
 };
 
 export {

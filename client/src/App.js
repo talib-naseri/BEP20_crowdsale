@@ -6,6 +6,9 @@ import {
   Grid,
   FormControlLabel,
   Checkbox,
+  Snackbar,
+  Alert,
+  AlertTitle,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import AccountBalanceWalletOutlinedIcon from '@mui/icons-material/AccountBalanceWalletOutlined';
@@ -20,6 +23,21 @@ function App() {
   const [amount, setAmount] = useState(0);
   const [haveRef, setHaveRef] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [alertData, setAlertData] = useState({
+    severity: 'info',
+    title: 'INFO',
+    message: 'Info message',
+  });
+
+  //Toast functions
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setOpen(false);
+  };
 
   // Connection functions
   const connect = async () => {
@@ -28,9 +46,20 @@ function App() {
       window.web3 = new Web3(window.ethereum);
       const chainId = await window.web3.eth.getChainId();
       if (chainId !== 97) {
-        console.log('Please choose smart chain testnet from metamask'); // create a message
+        setOpen(true);
+        setAlertData({
+          severity: 'error',
+          title: 'ERROR:',
+          message: 'Only Binance Smart Chain Testnet Allowed.',
+        });
         return;
       }
+      setOpen(true);
+      setAlertData({
+        severity: 'success',
+        title: 'SUCCESS:',
+        message: 'You are connected.',
+      });
       return setConnection(true);
     }
     return;
@@ -57,11 +86,13 @@ function App() {
     setSubmitted(true);
 
     // send transaction
-    await buyToken(window.web3, amount);
+    const info = await buyToken(window.web3, amount);
 
     // clear values
     setAmount(0);
     setSubmitted(false);
+    setOpen(true);
+    setAlertData({ ...info });
   };
 
   return (
@@ -144,6 +175,23 @@ function App() {
           </Box>
         </Grid>
       </Grid>
+
+      {/* Toast messages */}
+      <Snackbar
+        open={open}
+        autoHideDuration={6000}
+        onClose={handleClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert
+          severity={alertData.severity}
+          sx={{ width: '100%' }}
+          variant='filled'
+        >
+          <AlertTitle>{alertData.title}</AlertTitle>
+          {alertData.message}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }
