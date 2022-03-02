@@ -12,9 +12,12 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import { BuyInput, GetInput } from './components/input';
 import Web3 from 'web3';
 import { useState } from 'react';
+import { getMunziContract } from './components/contracts';
 
 function App() {
   const [connected, setConnection] = useState(false);
+  const [amount, setAmount] = useState(0);
+  const [haveRef, setHaveRef] = useState(false);
 
   const connect = async () => {
     if (window.web3) {
@@ -33,6 +36,14 @@ function App() {
   const disConnect = async () => {
     window.web3 = new Web3();
     setConnection(false);
+  };
+
+  const handleRefChange = (event) => {
+    setHaveRef(event.target.checked);
+  };
+
+  const submit = async () => {
+    console.log('submitting: ', { amount, haveRef });
   };
 
   return (
@@ -83,11 +94,21 @@ function App() {
         <Grid item md={6} xs={12}>
           <Box sx={{ borderRadius: 10 }} className='container'>
             <p className='text-center'>Munzi.io- ICO pad</p>
-            <BuyInput />
-            <GetInput />
+            <BuyInput
+              web3={connected ? window.web3 : null}
+              handleInput={(value) => setAmount(value)}
+              value={amount}
+            />
+            <GetInput web3={connected ? window.web3 : null} value={amount} />
             <Container className='mb-2'>
               <FormControlLabel
-                control={<Checkbox />}
+                control={
+                  <Checkbox
+                    checked={Boolean(haveRef)}
+                    onChange={handleRefChange}
+                    inputProps={{ 'aria-label': 'controlled' }}
+                  />
+                }
                 label='Have a referral?'
               />
             </Container>
@@ -96,8 +117,9 @@ function App() {
                 variant='contained'
                 color='success'
                 className='d-block rounded-pill'
+                onClick={() => submit()}
               >
-                Contained
+                Buy $SPL
               </Button>
             </div>
           </Box>

@@ -32,6 +32,8 @@
     border-radius: 14px;
     background-color: rgb(81, 17, 230);
     color: whitesmoke;
+    padding: 1% 15% !important;
+    
 }
 
 .small_txt{
