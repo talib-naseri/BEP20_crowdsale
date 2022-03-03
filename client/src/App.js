@@ -187,7 +187,11 @@ function App() {
         )}
 
         <div className='mt-2'>
-          <Link href='https://testnet.bscscan.com/' underline='none'>
+          <Link
+            href='https://testnet.bscscan.com/'
+            target='_blank'
+            underline='none'
+          >
             <LinkIcon />{' '}
             <span> Go to Binance Smart Chain Testnet Explorer</span>
           </Link>
