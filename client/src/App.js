@@ -9,14 +9,17 @@ import {
   Snackbar,
   Alert,
   AlertTitle,
+  Link,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import AccountBalanceWalletOutlinedIcon from '@mui/icons-material/AccountBalanceWalletOutlined';
+import LinkIcon from '@mui/icons-material/Link';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { BuyInput, GetInput } from './components/input';
 import Web3 from 'web3';
 import { useState } from 'react';
 import { getBalance, buyToken } from './components/web3Utils';
+import { ConnectionToggleButtons } from './components/toggleButtons';
 
 function App() {
   const [connected, setConnection] = useState(false);
@@ -24,6 +27,7 @@ function App() {
   const [haveRef, setHaveRef] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [open, setOpen] = useState(false);
+  const [bothConnections, setBothConnections] = useState(false);
   const [alertData, setAlertData] = useState({
     severity: 'info',
     title: 'INFO',
@@ -39,35 +43,86 @@ function App() {
     setOpen(false);
   };
 
+  const giveAToast = (severity, title, message) => {
+    setAlertData({
+      severity,
+      title,
+      message,
+    });
+    setOpen(true);
+  };
+
   // Connection functions
-  const connect = async () => {
-    if (window.web3) {
-      await window.ethereum.request({ method: 'eth_requestAccounts' });
+  const connectToBscWallet = async () => {
+    try {
+      if (!window.BinanceChain) throw new Error('No Binance Wallet found');
+      await window.BinanceChain.request({
+        method: 'eth_accounts',
+      });
+      window.web3 = new Web3(window.BinanceChain);
+      const chainId = await window.web3.eth.getChainId();
+      if (chainId !== 97)
+        throw new Error('Only Binance Smart Chain Testnet Allowed to Connect');
+
+      giveAToast(
+        'success',
+        'Success',
+        'Connected to Binance Wallet Successfully.'
+      );
+      return setConnection(true);
+    } catch (error) {
+      return giveAToast(
+        'error',
+        'ERROR_CONNECTING_BINANCE_WALLET',
+        error.message ? error.message : 'Something Went Wrong.'
+      );
+    }
+  };
+
+  const connectToEthWallet = async () => {
+    try {
+      if (!window.ethereum) throw new Error('No MetaMask Wallet found');
+      await window.ethereum.request({
+        method: 'eth_requestAccounts',
+      });
       window.web3 = new Web3(window.ethereum);
       const chainId = await window.web3.eth.getChainId();
-      if (chainId !== 97) {
-        setOpen(true);
-        setAlertData({
-          severity: 'error',
-          title: 'ERROR:',
-          message: 'Only Binance Smart Chain Testnet Allowed.',
-        });
-        return;
-      }
-      setOpen(true);
-      setAlertData({
-        severity: 'success',
-        title: 'SUCCESS:',
-        message: 'You are connected.',
-      });
+      if (chainId !== 97)
+        throw new Error('Only Binance Smart Chain Testnet Allowed to Connect');
+
+      giveAToast('success', 'Success', 'Connected to MetaMask successfully.');
       return setConnection(true);
+    } catch (error) {
+      return giveAToast(
+        'error',
+        'ERROR_CONNECTING_BINANCE_WALLET',
+        error.message ? error.message : 'Something Went Wrong.'
+      );
     }
-    return;
+  };
+
+  const connect = async () => {
+    try {
+      if (window.ethereum && window.BinanceChain)
+        return setBothConnections(true);
+
+      if (window.ethereum) return connectToEthWallet();
+      if (window.BinanceChain) return connectToBscWallet();
+
+      return new Error('No Wallets Found');
+    } catch (error) {
+      return giveAToast(
+        'error',
+        'ERROR_CONNECTING',
+        error.message ? error.message : 'Something went wrong.'
+      );
+    }
   };
 
   const disConnect = async () => {
     window.web3 = new Web3();
     setConnection(false);
+    setBothConnections(false);
   };
 
   // input functions
@@ -97,29 +152,49 @@ function App() {
 
   return (
     <Container>
+      {/* Connection Buttons */}
       <div className='button_container mt'>
-        {connected ? (
-          <Button
-            variant='contained'
-            color='error'
-            size='large'
-            onClick={() => disConnect()}
-            startIcon={<LogoutIcon />}
-          >
-            Disconnect
-          </Button>
+        {bothConnections ? (
+          <ConnectionToggleButtons
+            ethConnect={connectToEthWallet}
+            bscConnect={connectToBscWallet}
+            disConnect={disConnect}
+          />
         ) : (
-          <Button
-            variant='contained'
-            color='success'
-            size='large'
-            onClick={() => connect()}
-            startIcon={<AccountBalanceWalletOutlinedIcon />}
-          >
-            Connect
-          </Button>
+          <>
+            {connected ? (
+              <Button
+                variant='contained'
+                color='error'
+                size='large'
+                onClick={() => disConnect()}
+                startIcon={<LogoutIcon />}
+              >
+                Disconnect
+              </Button>
+            ) : (
+              <Button
+                variant='contained'
+                color='success'
+                size='large'
+                onClick={() => connect()}
+                startIcon={<AccountBalanceWalletOutlinedIcon />}
+              >
+                Connect
+              </Button>
+            )}
+          </>
         )}
+
+        <div className='mt-2'>
+          <Link href='https://testnet.bscscan.com/' underline='none'>
+            <LinkIcon />{' '}
+            <span> Go to Binance Smart Chain Testnet Explorer</span>
+          </Link>
+        </div>
       </div>
+
+      {/* App pads */}
       <Grid
         container
         direction='row'
@@ -192,6 +267,8 @@ function App() {
           {alertData.message}
         </Alert>
       </Snackbar>
+
+      {/* Link to binance explorer */}
     </Container>
   );
 }
