@@ -23,7 +23,6 @@ contract PrivateSale is Ownable {
 
     bool public isSaleEnded;
 
-    mapping(address => uint256) tokenHolders;
     /**
      * Event for token purchase logging
      * @param purchaser who paid for the tokens
@@ -90,13 +89,12 @@ contract PrivateSale is Ownable {
 
         // calculate token amount to be created
         uint256 tokens = _getTokenAmount(weiAmount);
-        uint256 _50Percent = tokens.div(2);
-        tokenHolders[_beneficiary] = _50Percent;
+
         // update state
         weiRaised = weiRaised.add(weiAmount);
 
-        _deliverTokens(_beneficiary, _50Percent);
-        emit TokenPurchase(msg.sender, _beneficiary, weiAmount, _50Percent);
+        _deliverTokens(_beneficiary, tokens);
+        emit TokenPurchase(msg.sender, _beneficiary, weiAmount, tokens);
 
         _forwardFunds();
     }
@@ -162,13 +160,6 @@ contract PrivateSale is Ownable {
      */
     function _forwardFunds() internal {
         wallet.transfer(msg.value);
-    }
-
-    function withdraw(address withdrawer) external isVestingFinished {
-        require(withdrawer != address(0), "BEP20: Transfer to zero address");
-        uint256 withdrawnAmount = tokenHolders[withdrawer];
-        tokenHolders[withdrawer] = 0;
-        _deliverTokens(withdrawer, withdrawnAmount);
     }
 
     function sendTokensBack() external onlyOwner isVestingFinished {
