@@ -10,7 +10,6 @@ import {
   Alert,
   AlertTitle,
   Link,
-  Slide,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import AccountBalanceWalletOutlinedIcon from '@mui/icons-material/AccountBalanceWalletOutlined';
