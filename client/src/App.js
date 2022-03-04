@@ -14,7 +14,6 @@ import {
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import AccountBalanceWalletOutlinedIcon from '@mui/icons-material/AccountBalanceWalletOutlined';
-import LinkIcon from '@mui/icons-material/Link';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { BuyInput, GetInput } from './components/input';
 import Web3 from 'web3';
