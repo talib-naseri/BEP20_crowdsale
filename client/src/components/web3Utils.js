@@ -2,6 +2,10 @@ import { CROWD_SALE_ADDRESS, TOKEN_ADDRESS } from './addresses';
 const crowdSaleABI = require('./ABIs/crowdSaleContract.json');
 const munziABI = require('./ABIs/MunziContractABI.json');
 
+// Constants
+const BSC_TESTNET_EXPLORER_URL = 'https://testnet.bscscan.com/';
+
+// Functions
 const getCrowdSaleContract = (web3) => {
   return web3 ? new web3.eth.Contract(crowdSaleABI, CROWD_SALE_ADDRESS) : null;
 };
@@ -33,6 +37,8 @@ const buyToken = async (web3, value) => {
     message: 'Transaction is done successfully',
   };
 
+  let txHash = null;
+
   // Get tx info
   const contract = getCrowdSaleContract(web3);
   const account = await getAddress(web3);
@@ -50,6 +56,7 @@ const buyToken = async (web3, value) => {
     })
     .once('transactionHash', (hash) => {
       console.log('TRANSACTION_HASH: ', hash);
+      txHash = hash;
     })
     .once('receipt', (receipt) => {
       console.log('RECEIPT: ', receipt);
@@ -64,6 +71,10 @@ const buyToken = async (web3, value) => {
       info.message = error.message;
     });
 
+  if (info.severity === 'success') {
+    info.link = BSC_TESTNET_EXPLORER_URL + 'tx/' + txHash;
+  }
+
   return info;
 };
 
@@ -73,4 +84,5 @@ export {
   getAddress,
   getBalance,
   buyToken,
+  BSC_TESTNET_EXPLORER_URL,
 };

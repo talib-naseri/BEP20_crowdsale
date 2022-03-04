@@ -10,6 +10,7 @@ import {
   Alert,
   AlertTitle,
   Link,
+  Slide,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import AccountBalanceWalletOutlinedIcon from '@mui/icons-material/AccountBalanceWalletOutlined';
@@ -21,13 +22,18 @@ import { useState } from 'react';
 import { getBalance, buyToken } from './components/web3Utils';
 import { ConnectionToggleButtons } from './components/toggleButtons';
 
+const DEFAULT_TOAST_TIME = 6000;
+
 function App() {
   const [connected, setConnection] = useState(false);
   const [amount, setAmount] = useState(0);
   const [haveRef, setHaveRef] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [open, setOpen] = useState(false);
+  const [toastTime, setToastTime] = useState(DEFAULT_TOAST_TIME);
   const [bothConnections, setBothConnections] = useState(false);
+  const [linkOpen, setLinkOpen] = useState(false);
+  const [txLink, setTxLink] = useState('#');
   const [alertData, setAlertData] = useState({
     severity: 'info',
     title: 'INFO',
@@ -40,16 +46,32 @@ function App() {
       return;
     }
 
+    setToastTime(DEFAULT_TOAST_TIME);
     setOpen(false);
   };
 
-  const giveAToast = (severity, title, message) => {
+  const giveAToast = (
+    severity,
+    title,
+    message,
+    toastTime = DEFAULT_TOAST_TIME
+  ) => {
     setAlertData({
       severity,
       title,
       message,
     });
+    setToastTime(toastTime);
     setOpen(true);
+  };
+
+  const linkCloseHandle = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setLinkOpen(false);
+    setTxLink('#');
   };
 
   // Connection functions
@@ -146,8 +168,13 @@ function App() {
     // clear values
     setAmount(0);
     setSubmitted(false);
-    setOpen(true);
-    setAlertData({ ...info });
+
+    giveAToast(info.severity, info.title, info.message);
+
+    if (info.severity === 'success') {
+      setLinkOpen(true);
+      setTxLink(info.link);
+    }
   };
 
   return (
@@ -185,17 +212,6 @@ function App() {
             )}
           </>
         )}
-
-        <div className='mt-2'>
-          <Link
-            href='https://testnet.bscscan.com/'
-            target='_blank'
-            underline='none'
-          >
-            <LinkIcon />{' '}
-            <span> Go to Binance Smart Chain Testnet Explorer</span>
-          </Link>
-        </div>
       </div>
 
       {/* App pads */}
@@ -207,18 +223,6 @@ function App() {
         rowSpacing={1}
         columnSpacing={5}
       >
-        <Grid item md={6} xs={12}>
-          <Box sx={{ borderRadius: 10 }} className='container'>
-            <h1 className='secondary'>Phase 2/5 is Live</h1>
-            <p>Price of 1 ETH per 3000 SPL</p>
-            <p>1 phases completed</p>
-
-            <p>a slide bar</p>
-            <p>two sided components</p>
-            <p>Sold</p>
-            <p>Sold today</p>
-          </Box>
-        </Grid>
         <Grid item md={6} xs={12}>
           <Box sx={{ borderRadius: 10 }} className='container'>
             <p className='text-center'>Munzi.io- ICO pad</p>
@@ -248,7 +252,7 @@ function App() {
                 className='d-block rounded-pill'
                 onClick={() => submit()}
               >
-                Buy $SPL
+                Buy $MUN
               </LoadingButton>
             </div>
           </Box>
@@ -258,7 +262,7 @@ function App() {
       {/* Toast messages */}
       <Snackbar
         open={open}
-        autoHideDuration={6000}
+        autoHideDuration={toastTime}
         onClose={handleClose}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
@@ -273,6 +277,31 @@ function App() {
       </Snackbar>
 
       {/* Link to binance explorer */}
+      <Snackbar
+        open={linkOpen}
+        autoHideDuration={20000}
+        onClose={linkCloseHandle}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert
+          severity='info'
+          sx={{ width: '100%' }}
+          onClose={linkCloseHandle}
+          variant='filled'
+        >
+          <span>
+            <Link
+              color='secondary'
+              underline='always'
+              href={txLink}
+              target='_blank'
+            >
+              Click here
+            </Link>
+            <span> </span>to see your transaction
+          </span>
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }

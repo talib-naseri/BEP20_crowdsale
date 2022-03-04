@@ -125,7 +125,7 @@ const GetInput = (props) => {
         <Grid item xs={8}>
           <div className='text-center'>
             <span className='small_text font-monospace text-muted fst-italic'>
-              {rate ? rate : 0} SPL/BNB
+              {rate ? rate : 0} MUN/BNB
             </span>
           </div>
         </Grid>
@@ -141,7 +141,7 @@ const GetInput = (props) => {
         </Grid>
         <Grid item xs={1}></Grid>
         <Grid item xs={2}>
-          <span className='fw-bold'>SPL</span>
+          <span className='fw-bold'>MUN</span>
         </Grid>
       </Grid>
     </Box>
